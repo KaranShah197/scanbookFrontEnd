@@ -1,0 +1,7 @@
+com\springrestapi\dao\BooksInfoDAO.class
+com\springrestapi\controller\BooksController.class
+com\springrestapi\repository\BooksRepository.class
+com\springrestapi\BooksApplication.class
+com\springrestapi\controller\BooksViewController.class
+com\springrestapi\model\BooksInfo.class
+com\springrestapi\controller\ClientCredentials.class

@@ -1,0 +1,157 @@
+<html>
+<head>
+    <title>Google Books Info</title>
+    <link href="webjars/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+    	<h2>View Books, Save Notes, Update Read Status</h2>
+    	<div class="row col-md-6">
+	    	<div class="form-group">
+			    <label for="isbn">Enter ISBN: </label>
+			    <input type="number" class="form-control" id="isbn" aria-describedby="ISBN of Books" placeholder="ISBN of Book" min=9000000000000 max=9999999999999>
+			</div>
+			<button type="submit" id="search" class="btn btn-primary">Submit</button>
+	    </div>
+	    
+	    <br>
+	    <br>
+	    <br>
+	    <br>
+	    <br>
+	    <br>
+	    <br> 
+	    
+	    <div id="booksDetails"> 
+        <table class="table table-striped" id="infromation">
+            <thead class="thead-dark">
+			    <tr>
+			      <th scope="col">Title</th>
+			      <th scope="col">Author</th>
+			      <th scope="col">Pages</th>
+			      <th scope="col">Read</th>
+			      <th scope="col">Notes</th>
+			    </tr>
+			  </thead>
+            <tbody>
+				 <tr>
+				     <td></td>
+				     <td></td>
+				     <td></td>
+				     <td></td>
+				     <td><textarea></textarea></td>
+				 </tr>
+            </tbody>
+        </table>
+        
+        <br><br><br>
+        <span>Have you Read this Book</span>
+        <label> Yes:</label>
+        <input type="radio" name="read" value="Yes"/>
+        <label> No:</label>
+        <input type="radio" name="read" value="No"/>
+        </div>
+        
+		<!-- Modal Blank Input-->
+		<div class="modal fade" id="errorModel" tabindex="-1" role="dialog" aria-labelledby="errorModalCenterTitle" aria-hidden="true">
+		    <div class="modal-dialog modal-dialog-centered" role="document">
+		    <div class="modal-content">
+		        <div class="modal-header">
+		        <h2 class="modal-title col-md-10" id="errorModelTitle">Error Message</h2>
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+		            <span aria-hidden="true">&times;</span>
+		        </button>
+		        </div>
+		        <div class="modal-body">
+		            <span>Please Enter a ISBN before clicking on Submit button.</span>
+		        </div>
+		    </div>
+		    </div>
+		</div>
+		<!-- Modal Null result from search -->
+		<div class="modal fade" id="nfModal" tabindex="-1" role="dialog" aria-labelledby="nfModalCenterTitle" aria-hidden="true">
+		    <div class="modal-dialog modal-dialog-centered" role="document">
+		    <div class="modal-content">
+		        <div class="modal-header">
+		        <h2 class="modal-title col-md-10" id="nfModalTitle">Not Found</h2>
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+		            <span aria-hidden="true">&times;</span>
+		        </button>
+		        </div>
+		        <div class="modal-body">
+		            <span>Not able to find a book with the given ISBN. Please enter correct ISBN.</span>
+		        </div>
+		    </div>
+		    </div>
+		</div>
+
+        <script src="webjars/jquery/1.9.1/jquery.min.js"></script>
+        <script src="webjars/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    </div>
+</body>
+
+<style type="text/css">
+	input[type=number]::-webkit-inner-spin-button, 
+	input[type=number]::-webkit-outer-spin-button { 
+	  -webkit-appearance: none; 
+	  margin: 0; 
+	}
+
+</style>
+   
+<script type="text/javascript">
+	$("#booksDetails").hide();
+   	$("#search").click(function(){
+   		var query = ($("#isbn").val()) ? $("#isbn").val() : null;
+   		
+   		if(query == null){
+   			$("#nfModal").modal();
+
+   		}else{
+   			var isbn = isValidISBN(query);
+   		
+	   		console.log("button clicked: ",isbn);
+	   		$("#booksDetails").hide();
+	   		if(query != null){
+	   			$.ajax({
+	   				url: "/books/search/"+query,
+	   				success: function(result){
+	   					console.log("result: ", result);
+	   					$("#booksDetails").show();
+	   			    	$("#infromation tbody").html('<tr><td>'+result.title+'</td><td>'+result.author+'</td><td>'+result.numberOfPages+'</td><td>'+result.readFlag+'</td><td><label>Addes Notes:</lable><br><textarea class="ta"></textarea></td></tr>');
+	   			    	
+	   			    	$(".ta").text(result.notes);
+	   			    	if(result.readFlag == 1)
+	   			    		$('input[name=yes]').prop('check', true);
+	   			    	else
+	   			    		$('input[name=no]').prop('check', true);
+	   			  	},
+	   			  	error: function(result){
+	   			  		$("#nfModal").modal();
+	   			  	}
+	   			});
+	   		}else{ 
+	   			//alert("Please enter ISBN to search for a book");
+	   			
+	   			$("#errorModel").modal();
+	   		}
+   		}
+   	});
+   	
+   	function isValidISBN (isbn) {
+   		isbn = isbn.replace(/[^\dX]/gi, '');
+   	  	if(isbn.length != 10){
+   	    	return false;
+   	  	}
+   	  	var chars = isbn.split('');
+   	  	if(chars[9].toUpperCase() == 'X'){
+   	    	chars[9] = 10;
+   	  	}
+   	  	var sum = 0;
+   	  	for (var i = 0; i < chars.length; i++) {
+   	    	sum += ((10-i) * parseInt(chars[i]));
+   	  	};
+   	  	return ((sum % 11) == 0);
+   	}
+</script>
+</html>
